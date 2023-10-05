@@ -2,8 +2,10 @@ using IFSPStore.Domain.Entities;
 using IFSPSTore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using static IFSPStore.Domain.Entities.Venda;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -11,15 +13,49 @@ namespace IFSPStore.Test
 {
     [TestClass]
     public class UnitTestRepository
-    {
+    { 
+
+
+        public class MyDbContext : DbContext
+        {
+            public DbSet<Usuario> Usuario { get; set; }
+            public DbSet<Cidade> Cidade { get; set; }
+            public DbSet<Grupo> Grupo { get; set; }
+            public DbSet<Produto> Produto { get; set; }
+            public DbSet<Cliente> Cliente { get; set; }
+            public DbSet<Venda> Venda { get; set; }
+            public DbSet<VendaItem> VendaItem { get; set; }
+
+            public MyDbContext()
+            {
+                //Força a criação do banco de dados;
+                Database.EnsureCreated();
+            }
+
+            protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+            {
+                var server = "localhost";
+                var port = "3306";
+                var database = "IFSPStore";
+                var username = "root";
+                var password = "";
+                var strCon = $"Server={server};Port={port};" + $"Database={database}; Uid={username};Pwd={password}";
+
+                if (!optionsBuilder.IsConfigured)
+                {
+                    optionsBuilder.UseMySql(strCon, ServerVersion.AutoDetect(strCon));
+                }
+            }
+        }
+
+
         #region Test Usuario
         [TestMethod]
         public void TestUsuario()
         {
             using (var context = new MyDbContext()){
-                var usuario = new Usuario("Murilo Varges",
-                            "murilo", "semsenha", "email",
-                            DateTime.UtcNow.ToLocalTime(), DateTime.UtcNow.ToLocalTime(), true);
+                var usuario = new Usuario("Jadir", "12345", "Jadir123", "jadirjunior8@gmail.com", 
+                    DateTime.UtcNow.ToLocalTime(), DateTime.UtcNow.ToLocalTime(), true);
 
                 context.Usuario.Add(usuario);
                 context.SaveChanges();
@@ -40,6 +76,7 @@ namespace IFSPStore.Test
             }
         }
         #endregion
+        
 
         #region Teste Cidade
         [TestMethod]
@@ -47,7 +84,7 @@ namespace IFSPStore.Test
         {
             using (var context = new MyDbContext())
             {
-                var cidade = new Cidade("Aracatuba", "SP");
+                var cidade = new Cidade("Araçatuba", "SP");
 
                 context.Cidade.Add(cidade);
                 context.SaveChanges();
@@ -84,7 +121,7 @@ namespace IFSPStore.Test
         }
 
         [TestMethod]
-        public void TesteSelectGrupo()
+        public void TestSelectGrupo()
         {
             using (var context = new MyDbContext())
             {
@@ -97,31 +134,111 @@ namespace IFSPStore.Test
             }
         }
         #endregion
-    }
 
-    public class MyDbContext : DbContext{
-        public DbSet<Usuario> Usuario { get; set; }
-        public DbSet<Cidade> Cidade{ get; set; }
-        public DbSet<Grupo> Grupo { get; set; }
-        public DbSet<Produto> Produto { get; set; }
-        public MyDbContext()
+
+        #region Test Cliente
+        [TestMethod]
+        public void TestCliente()
         {
-            //Força a criação do banco de dados;
-            Database.EnsureCreated();
+            using (var context = new MyDbContext())
+            {
+
+                var cidade = context.Cidade.First(c => c.id == 1);
+                var cliente = new Cliente("Roger", "Rua de Abreu", "528416157", "Jardim Europa", cidade);
+
+                context.Cliente.Add(cliente);
+                context.SaveChanges();
+
+            };
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        [TestMethod]
+        public void TestSelectCliente()
         {
-            var server = "localhost";
-            var port = "3306";
-            var database = "IFSPStore";
-            var username = "root";
-            var password = "";
-            var strCon = $"Server={server};Port={port};" + $"Database={database}; Uid={username};Pwd={password}";
-
-            if (!optionsBuilder.IsConfigured) { 
-                optionsBuilder.UseMySql(strCon, ServerVersion.AutoDetect(strCon));  
+            using (var context = new MyDbContext())
+            {
+                foreach (var cliente in context.Cliente)
+                {
+                    {
+                        Console.WriteLine(JsonSerializer.Serialize(cliente));
+                    }
+                }
             }
         }
+        #endregion
+
+
+        #region Test Produto
+        [TestMethod]
+        public void TestProduto()
+        {
+            using (var context = new MyDbContext())
+            {
+                var grupo = context.Grupo.First(c => c.id == 1);
+                var produto = new Produto("Panela", 100, 50, DateTime.UtcNow.ToLocalTime(), 5, grupo);
+
+                context.Produto.Add(produto);
+                context.SaveChanges();
+            };
+        }
+
+        [TestMethod]
+        public void TestSelectProduto()
+        {
+            using (var context = new MyDbContext()) 
+            { 
+                foreach (var produto in context.Produto)
+                {
+                    {
+                        Console.WriteLine(JsonSerializer.Serialize(produto));
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region Test Venda
+        [TestMethod]
+        public void TestVenda()
+        {
+            using (var context = new MyDbContext())
+            {
+
+                var usuario = context.Usuario.First(uu => uu.id == 1);
+
+                var produto = context.Produto.First(p => p.id == 1);
+
+                var vendaItem = new VendaItem(5, 20, 100, produto);
+
+                var cliente = context.Cliente.First(c => c.id == 1);
+
+                var venda = new Venda(DateTime.UtcNow.ToLocalTime(), 200, usuario, cliente, new List<VendaItem>()
+                {
+                    vendaItem
+                });
+
+                context.Venda.Add(venda);
+                context.VendaItem.Add(vendaItem);
+                context.SaveChanges();
+            };
+        }
+
+        [TestMethod]
+        public void TestSelectVenda()
+        {
+            using (var context = new MyDbContext())
+            {
+                foreach (var venda in context.Venda)
+                {
+                    {
+                        Console.WriteLine(JsonSerializer.Serialize(venda));
+                    }
+                }
+            }
+        }
+        #endregion
+
     }
+
+
 }

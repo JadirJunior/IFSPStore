@@ -20,7 +20,15 @@ namespace IFSPStore.Test
             var cli = new Cliente("Cliente jeferson", "Jeff Landia", "530000", "Portal da Perola II", cida);
 
             var grupo = new Grupo("Grupo bao");
-            var produto = new Produto("Panela", 100, 1, DateTime.UtcNow.ToLocalTime(), 1, grupo);
+            //var produto = new Produto("Panela", 100, 1, DateTime.UtcNow.ToLocalTime(), 1, grupo);
+
+            var produto = new Produto();
+            produto.Nome = "Panela";
+            produto.Preco = 100;
+            produto.Quantidade = 5;
+            produto.UnidadeVenda = 1;
+            produto.DataCompra = DateTime.UtcNow.ToLocalTime();
+            produto.Grupo = grupo;
 
             var options = new JsonSerializerOptions
             {
@@ -85,7 +93,16 @@ namespace IFSPStore.Test
         public void TestProduto()
         {
             var grupo = new Grupo("Grupo bao");
-            var produto = new Produto("Panela", 100, 1, DateTime.UtcNow.ToLocalTime(), 1, grupo);
+            //var produto = new Produto("Panela", 100, 1, DateTime.UtcNow.ToLocalTime(), 1, grupo);
+
+            var produto = new Produto();
+            produto.Nome = "Panela";
+            produto.Preco = 100;
+            produto.Quantidade = 5;
+            produto.UnidadeVenda = 1;
+            produto.DataCompra = DateTime.UtcNow.ToLocalTime();
+            produto.Grupo = grupo;
+
             var options = new JsonSerializerOptions
             {
                 WriteIndented = true,
@@ -102,7 +119,16 @@ namespace IFSPStore.Test
             var cli = new Cliente("Cliente jeferson", "Jeff Landia", "530000", "Portal da Perola II", cida);
 
             var grupo = new Grupo("Grupo bao");
-            var produto = new Produto("Panela", 100, 1, DateTime.UtcNow.ToLocalTime(), 1, grupo);
+            //var produto = new Produto("Panela", 100, 1, DateTime.UtcNow.ToLocalTime(), 1, grupo);
+
+            var produto = new Produto();
+            produto.Nome = "Panela";
+            produto.Preco = 100;
+            produto.Quantidade = 5;
+            produto.UnidadeVenda = 1;
+            produto.DataCompra = DateTime.UtcNow.ToLocalTime();
+            produto.Grupo = grupo;
+
             List<VendaItem> vendaItens = new List<VendaItem>();
 
             var venda = new Venda(DateTime.UtcNow.ToLocalTime(), 100, user, cli, vendaItens);
